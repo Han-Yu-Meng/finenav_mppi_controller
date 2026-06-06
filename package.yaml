@@ -1,0 +1,19 @@
+name: "finenav_mppi_controller"
+version: "0.1.0"
+description: "MPPI Controller for FineNav"
+maintainers:
+  - name: "fins"
+    email: "fins@sjtu.edu.cn"
+depends:
+  xtensor: "system"
+  
+  geometry_msgs: "system"
+  visualization_msgs: "system"
+  nav_msgs: "system"
+
+  tf2_eigen: "system"
+  tf2_ros: "system"
+  angle: "system"
+
+licenses:
+  - "MPL-2.0"
