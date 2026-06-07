@@ -14,6 +14,7 @@
 
 #include <string>
 #include <memory>
+#include <nav_msgs/msg/odometry.hpp>
 #include <fins/node.hpp>
 
 #include "finenav_mppi_controller/models/constraints.hpp"
@@ -36,8 +37,7 @@ public:
         set_category("Navigation");
 
         register_input<nav_msgs::msg::Path>("reference_path", &MPPIControllerNode::onReferencePath);
-        register_input<geometry_msgs::msg::PoseStamped>("current_pose", &MPPIControllerNode::onCurrentPose);
-        register_input<geometry_msgs::msg::Twist>("current_velocity", &MPPIControllerNode::onCurrentVelocity);
+        register_input<nav_msgs::msg::Odometry>("odom", &MPPIControllerNode::onOdometry);
 
         register_output<geometry_msgs::msg::Twist>("cmd_vel");
         register_output<nav_msgs::msg::Path>("optimal_path");
@@ -70,12 +70,10 @@ private:
         reference_path_ = path;
     }
 
-    void onCurrentVelocity(const geometry_msgs::msg::Twist& vel) {
-        current_velocity_ = vel;
-    }
-
-    void onCurrentPose(const geometry_msgs::msg::PoseStamped& pose) {
-        current_pose_ = pose;
+    void onOdometry(const nav_msgs::msg::Odometry& msg) {
+        current_pose_.header = msg.header;
+        current_pose_.pose = msg.pose.pose;
+        current_velocity_ = msg.twist.twist;
 
         if (reference_path_.poses.empty()) {
             return;

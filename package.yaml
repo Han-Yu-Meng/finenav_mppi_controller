@@ -14,7 +14,7 @@ depends:
   tf2_eigen: "system"
   tf2_ros: "system"
   tf2: "system"
-  tf2_geometry_msgs : "system"
+  tf2_geometry_msgs: "system"
   angle: "system"
 
 licenses:
