@@ -69,8 +69,7 @@ public:
     * @param dynamic_parameter_handler Parameter handler object
     */
   void on_configure(
-     std::vector<std::unique_ptr<critics::CriticFunction>> & critics,
-     arams);
+     std::vector<std::unique_ptr<critics::CriticFunction>> & critics);
 
   /**
     * @brief Score trajectories by the set of loaded critic functions
@@ -92,11 +91,8 @@ protected:
   std::string getFullName(const std::string & name);
 
 protected:
-  rclcpp_lifecycle::LifecycleNode::WeakPtr parent_;
   std::string name_;
   std::vector<std::unique_ptr<critics::CriticFunction>> critics_;
-
-  rclcpp::Logger logger_{rclcpp::get_logger("MPPIController")};
 };
 
 }  // namespace mppi

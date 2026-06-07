@@ -28,8 +28,8 @@ void VelocityDeadbandCritic::initialize()
   weight_  = config.get("cost_weight", 35.0f)
                    .with_description("Weight for velocity deadband cost");
 
-  auto dv = config.get("deadband_velocities", std::vector<double>{0.05, 0.05, 0.05})
-                  .with_description("Deadband thresholds [vx, vy, wz]; velocities below are penalized");
+  std::vector<double> dv = config.get("deadband_velocities", std::vector<double>{0.05, 0.05, 0.05})
+                   .with_description("Deadband thresholds [vx, vy, wz]; velocities below are penalized");
   deadband_velocities_.resize(3);
   for (size_t i = 0; i < 3 && i < dv.size(); ++i) {
     deadband_velocities_[i] = static_cast<float>(dv[i]);
@@ -45,6 +45,7 @@ void VelocityDeadbandCritic::initialize()
 
 void VelocityDeadbandCritic::score(CriticData & data, const IMapView& map_view)
 {
+  (void)map_view;
   using xt::evaluation_strategy::immediate;
 
   if (!this->enabled_) {

@@ -38,13 +38,14 @@ void PathAngleCritic::initialize()
                                  .with_description("Maximum allowed yaw error to furthest path point (rad)");
 
   // Determine reversing capability from top-level vx_min
-  const float vx_min = config.get("vx_min");
+  const float vx_min = config.get<float>("vx_min");
   reversing_allowed_  = (vx_min < 0.0f);
   forward_preference_ = !reversing_allowed_;
 }
 
 void PathAngleCritic::score(CriticData & data, const IMapView& map_view)
 {
+  (void)map_view;
   using xt::evaluation_strategy::immediate;
   if (!this->enabled_) {
     return;

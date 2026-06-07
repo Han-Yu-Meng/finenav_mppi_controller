@@ -88,7 +88,7 @@ public:
   /**
     * @brief Constructor for mppi::AckermannMotionModel
     */
-  explicit AckermannMotionModel(const std::string & name)
+  explicit AckermannMotionModel()
   {
     min_turning_r_= 0.2 ;
   }

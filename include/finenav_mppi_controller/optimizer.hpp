@@ -24,6 +24,8 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/path.hpp>
+#include <tf2/utils.h>
+// #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include "finenav_mppi_controller/models/optimizer_settings.hpp"
 #include "finenav_mppi_controller/motion_models.hpp"
@@ -69,15 +71,14 @@ public:
    */
     void initialize(
         const std::string & name,
-        std::vector<std::unique_ptr<critics::CriticFunction>> & critics,
-        arams)
+        std::vector<std::unique_ptr<critics::CriticFunction>> & critics)
     {
         name_ = name;
         critics_ = std::move(critics);
 
-        getParams(params);
+        getParams();
 
-        critic_manager_.on_configure(critics_, params);
+        critic_manager_.on_configure(critics_);
         noise_generator_.initialize(settings_, isHolonomic());
 
         reset();
@@ -136,7 +137,7 @@ public:
 
       std::string motion_model = config.get("motion_model", std::string("DiffDrive"))
                                        .with_description("Motion model type: DiffDrive, Omni, Ackermann")
-                                       .is_one_of({"DiffDrive", "Omni", "Ackermann"});
+                                       .one_of({"DiffDrive", "Omni", "Ackermann"});
       setMotionModel(motion_model);
 
       double controller_frequency = 1.0 / static_cast<double>(s.model_dt);
@@ -329,7 +330,7 @@ protected:
         } else if (model == "Omni") {
             motion_model_ = std::make_shared<OmniMotionModel>();
         } else if (model == "Ackermann") {
-            motion_model_ = std::make_shared<AckermannMotionModel>(name_);
+            motion_model_ = std::make_shared<AckermannMotionModel>();
         } else {
             throw std::runtime_error(
                     std::string(

@@ -61,16 +61,13 @@ public:
     * @param dynamic_parameter_handler Parameter handler object
     */
   void on_configure(
-    rclcpp_lifecycle::LifecycleNode::WeakPtr parent,
     const std::string & parent_name,
-    const std::string & name,
-    arams)
+    const std::string & name)
   {
-    parent_ = parent;
     name_ = name;
     parent_name_ = parent_name;
 
-    initialize(params);
+    initialize();
   }
 
   /**
@@ -82,7 +79,7 @@ public:
   /**
     * @brief Initialize critic
     */
-  virtual void initialize(arams) = 0;
+  virtual void initialize() = 0;
 
   /**
     * @brief Get name of critic#include "finenav_control_layers/local_layer.hpp"
@@ -95,8 +92,6 @@ public:
 protected:
   bool enabled_;
   std::string name_, parent_name_;
-  rclcpp_lifecycle::LifecycleNode::WeakPtr parent_;
-  rclcpp::Logger logger_{rclcpp::get_logger("CriticFunction")};
 
 };
 

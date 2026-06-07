@@ -33,6 +33,7 @@ void PreferForwardCritic::initialize()
 
 void PreferForwardCritic::score(CriticData & data, const IMapView& map_view)
 {
+  (void)map_view;
   using xt::evaluation_strategy::immediate;
   if (!this->enabled_ )
   {

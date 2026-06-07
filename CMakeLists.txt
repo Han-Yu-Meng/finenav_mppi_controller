@@ -70,6 +70,7 @@ fins_link_ros_dependencies(${PROJECT_NAME}
 
   tf2_eigen
   tf2_ros
+  tf2
   angles
 )
 

@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 #include <xtensor/xtensor.hpp>
 
 #include <geometry_msgs/msg/pose_stamped.hpp>

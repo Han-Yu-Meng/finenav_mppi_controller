@@ -32,6 +32,7 @@ void TwirlingCritic::initialize()
 
 void TwirlingCritic::score(CriticData & data, const IMapView& map_view)
 {
+  (void)map_view;
   using xt::evaluation_strategy::immediate;
   if (!this->enabled_)
   {

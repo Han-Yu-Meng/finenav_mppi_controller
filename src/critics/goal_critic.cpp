@@ -36,6 +36,7 @@ void GoalCritic::initialize()
 
 void GoalCritic::score(CriticData & data, const IMapView& map_view)
 {
+  (void)map_view;
   if (!this->enabled_ )
   {
     return;

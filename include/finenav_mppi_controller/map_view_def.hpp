@@ -13,5 +13,5 @@ namespace finenav_mppi_controller {
       std::function<int(const Position3D&)> getCost;
       std::function<float(float, float, float)> costAtPose;
       std::function<std::string(void)> getBaseFrameID;
-    }
+    };
 }

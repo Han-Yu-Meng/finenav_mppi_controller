@@ -33,6 +33,7 @@ void GoalAngleCritic::initialize()
 
 void GoalAngleCritic::score(CriticData & data, const IMapView& map_view)
 {
+  (void)map_view;
   if (!this->enabled_ )    //TODO:旧有的检查与距离的逻辑会触发，为什么
   {
     return;

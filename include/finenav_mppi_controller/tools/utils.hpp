@@ -35,6 +35,7 @@
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/path.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
+#include <tf2/utils.h>
 
 #include "finenav_mppi_controller/models/optimizer_settings.hpp"
 #include "finenav_mppi_controller/models/control_sequence.hpp"
