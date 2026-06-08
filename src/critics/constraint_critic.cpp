@@ -29,9 +29,10 @@ void ConstraintCritic::initialize()
                    .with_description("Weight for constraint violation cost");
 
   // Velocity limits come from the top-level optimizer params
-  const float vx_max = config.get<float>("vx_max");
-  const float vy_max = config.get<float>("vy_max");
-  const float vx_min = config.get<float>("vx_min");
+  fins::ParamLoader global_config("finenav_mppi_controller");
+  const float vx_max = global_config.get<float>("vx_max");
+  const float vy_max = global_config.get<float>("vy_max");
+  const float vx_min = global_config.get<float>("vx_min");
 
   const float min_sgn = vx_min > 0.0f ? 1.0f : -1.0f;
   max_vel_ = sqrtf(vx_max * vx_max + vy_max * vy_max);

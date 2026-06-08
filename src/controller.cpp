@@ -14,6 +14,10 @@
 
 #include <string>
 #include <memory>
+#include <chrono>
+#include <thread>
+#include <mutex>
+#include <atomic>
 #include <nav_msgs/msg/odometry.hpp>
 #include <fins/node.hpp>
 
@@ -31,6 +35,14 @@ using namespace mppi;
 class MPPIControllerNode : public fins::Node
 {
 public:
+    MPPIControllerNode() : stop_thread_(false), mppi_frequency_(10.0) {}
+    ~MPPIControllerNode() {
+        stop_thread_ = true;
+        if (worker_thread_.joinable()) {
+            worker_thread_.join();
+        }
+    }
+
     void define() override {
         set_name("MPPIControllerNode");
         set_description("Standalone MPPI Controller Node");
@@ -54,38 +66,80 @@ public:
     void initialize() override {
         initCritics();
         optimizer_.initialize("MPPIController", critics_);
+
+        fins::ParamLoader config("finenav_mppi_controller");
+        mppi_frequency_ = config.get("freq", 10);
+        
+        stop_thread_ = false;
+        worker_thread_ = std::thread(&MPPIControllerNode::controlLoop, this);
     }
 
     void run() override {
-        logger->info("MPPI Controller running.");
+        logger->info("MPPI Controller running at {} Hz.", mppi_frequency_);
     }
 
     void pause() override {}
     void reset() override {
+        std::lock_guard<std::mutex> lock(data_mutex_);
         optimizer_.reset();
     }
 
 private:
     void onReferencePath(const nav_msgs::msg::Path& path) {
+        std::lock_guard<std::mutex> lock(data_mutex_);
         reference_path_ = path;
     }
 
     void onOdometry(const nav_msgs::msg::Odometry& msg) {
+        std::lock_guard<std::mutex> lock(data_mutex_);
         current_pose_.header = msg.header;
         current_pose_.pose = msg.pose.pose;
         current_velocity_ = msg.twist.twist;
+    }
 
-        if (reference_path_.poses.empty()) {
-            return;
+    void controlLoop() {
+        while (!stop_thread_) {
+            auto start_time = std::chrono::steady_clock::now();
+            
+            bool has_path = false;
+            {
+                std::lock_guard<std::mutex> lock(data_mutex_);
+                has_path = !reference_path_.poses.empty();
+            }
+
+            if (has_path) {
+                nav_msgs::msg::Path ref_path;
+                geometry_msgs::msg::PoseStamped curr_pose;
+                geometry_msgs::msg::Twist curr_vel;
+                
+                {
+                    std::lock_guard<std::mutex> lock(data_mutex_);
+                    ref_path = reference_path_;
+                    curr_pose = current_pose_;
+                    curr_vel = current_velocity_;
+                }
+
+                auto start = std::chrono::steady_clock::now();
+                optimizer_.evalControl(curr_pose, curr_vel, ref_path, map_view_);
+                auto end = std::chrono::steady_clock::now();
+                std::chrono::duration<double, std::milli> duration = end - start;
+                logger->info("MPPI calculation time: {} ms", duration.count());
+
+                geometry_msgs::msg::Twist cmd_vel = getImmediateCommand();
+                send("cmd_vel", cmd_vel);
+
+                nav_msgs::msg::Path opt_path = getPredictedPath();
+                send("optimal_path", opt_path);
+            }
+
+            auto end_time = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+            auto period = std::chrono::microseconds(static_cast<long long>(1000000.0 / mppi_frequency_));
+            
+            if (elapsed < period) {
+                std::this_thread::sleep_for(period - elapsed);
+            }
         }
-
-        optimizer_.evalControl(current_pose_, current_velocity_, reference_path_, map_view_);
-
-        geometry_msgs::msg::Twist cmd_vel = getImmediateCommand();
-        send("cmd_vel", cmd_vel);
-
-        nav_msgs::msg::Path opt_path = getPredictedPath();
-        send("optimal_path", opt_path);
     }
 
 
@@ -142,6 +196,11 @@ private:
     Optimizer optimizer_;
     std::vector<std::unique_ptr<critics::CriticFunction>> critics_;
     IMapView map_view_;
+
+    double mppi_frequency_;
+    std::thread worker_thread_;
+    std::atomic<bool> stop_thread_;
+    std::mutex data_mutex_;
 };
 
 EXPORT_NODE(MPPIControllerNode)
