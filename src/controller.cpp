@@ -53,14 +53,9 @@ public:
 
         register_output<geometry_msgs::msg::Twist>("cmd_vel");
         register_output<nav_msgs::msg::Path>("optimal_path");
-
-        map_view_.isTrackingUnknown = register_client<bool(void)>("is_tracking_unknown");
-        map_view_.considerFootprint = register_client<bool(void)>("consider_footprint");
-        map_view_.isCollision       = register_client<bool(float, float, float)>("is_collision");
-        map_view_.getRadius         = register_client<float(void)>("get_radius");
-        map_view_.getCost           = register_client<int(const Position3D&)>("get_cost");
-        map_view_.costAtPose        = register_client<float(float, float, float)>("cost_at_pose");
-        map_view_.getBaseFrameID    = register_client<std::string(void)>("get_base_frame_id");
+        
+        map_view_.getRollingGridData_ = register_client<RollingGridData(void)>("get_rolling_grid_data");
+        map_view_.getBaseFrameID_    = register_client<std::string(void)>("get_base_frame_id");
     }
 
     void initialize() override {
@@ -120,6 +115,9 @@ private:
                 }
 
                 auto start = std::chrono::steady_clock::now();
+                
+                map_view_.updateCache(); 
+
                 optimizer_.evalControl(curr_pose, curr_vel, ref_path, map_view_);
                 auto end = std::chrono::steady_clock::now();
                 std::chrono::duration<double, std::milli> duration = end - start;
