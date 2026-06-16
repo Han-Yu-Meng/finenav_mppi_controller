@@ -35,7 +35,7 @@ using namespace mppi;
 class MPPIControllerNode : public fins::Node
 {
 public:
-    MPPIControllerNode() : stop_thread_(false), mppi_frequency_(10.0) {}
+    MPPIControllerNode() : mppi_frequency_(10.0), stop_thread_(false) {}
     ~MPPIControllerNode() {
         stop_thread_ = true;
         if (worker_thread_.joinable()) {
@@ -147,7 +147,7 @@ private:
         critics_.push_back(std::make_unique<critics::ConstraintCritic>());
         critics_.push_back(std::make_unique<critics::CostCritic>());
         critics_.push_back(std::make_unique<critics::GoalCritic>());
-        critics_.push_back(std::make_unique<critics::ObstaclesCritic>());
+        // critics_.push_back(std::make_unique<critics::ObstaclesCritic>());
         critics_.push_back(std::make_unique<critics::PathAlignCritic>());
         critics_.push_back(std::make_unique<critics::PathAlignLegacyCritic>());
         critics_.push_back(std::make_unique<critics::PathAngleCritic>());

@@ -16,6 +16,7 @@ depends:
   tf2: "system"
   tf2_geometry_msgs: "system"
   angle: "system"
+  tbb: "system"
 
 licenses:
   - "MPL-2.0"

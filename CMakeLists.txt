@@ -10,13 +10,19 @@ endif()
 
 include(CheckCXXCompilerFlag)
 
-check_cxx_compiler_flag("-mno-avx512f" COMPILER_SUPPORTS_AVX512)
 check_cxx_compiler_flag("-msse4.2" COMPILER_SUPPORTS_SSE4)
 check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
 check_cxx_compiler_flag("-mfma" COMPILER_SUPPORTS_FMA)
 
-if(COMPILER_SUPPORTS_AVX512)
-  add_compile_options(-mno-avx512f)
+if(POLICY CMP0069)
+  cmake_policy(SET CMP0069 NEW)
+endif()
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported OUTPUT error)
+if(ipo_supported)
+  set_property(DIRECTORY PROPERTY INTERPROCEDURAL_OPTIMIZATION ON)
+else()
+  message(WARNING "IPO is not supported: ${error}")
 endif()
 
 if(COMPILER_SUPPORTS_SSE4)
@@ -32,17 +38,18 @@ if(COMPILER_SUPPORTS_FMA)
 endif()
 
 # If building one the same hardware to be deployed on, try `-march=native`!
-add_compile_options(-O3 -finline-limit=10000000 -ffp-contract=fast -ffast-math -mtune=generic)
+add_compile_options(-O3 -finline-limit=10000000 -ffp-contract=fast -ffast-math -mtune=generic -march=native)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(XTENSOR_USE_TBB 0)
-set(XTENSOR_USE_OPENMP 0)
+set(XTENSOR_USE_TBB 1)
+set(XTENSOR_USE_OPENMP 1)
 set(XTENSOR_USE_XSIMD 1)
 
 find_package(xtensor REQUIRED)
 find_package(xsimd   REQUIRED)
+find_package(TBB REQUIRED)
 
 fins_add_node(${PROJECT_NAME}
   src/controller.cpp
@@ -84,4 +91,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   xtensor
   xtensor::optimize
   xtensor::use_xsimd
+  TBB::tbb
 )
